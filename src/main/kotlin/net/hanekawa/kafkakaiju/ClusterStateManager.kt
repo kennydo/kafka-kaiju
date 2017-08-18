@@ -77,5 +77,13 @@ class ClusterStateManager(private val stateCache: ClusterStateCache, private val
         }
         LOG.info("Finished refreshing cache")
     }
+
+    fun getNodeIds(): Collection<Int> {
+        return stateCache.getNodeIds()
+    }
+
+    fun getNodeByIds(nodeIds: Collection<Int>): Collection<Node?> {
+        return stateCache.getNodeByIds(nodeIds)
+    }
 }
 

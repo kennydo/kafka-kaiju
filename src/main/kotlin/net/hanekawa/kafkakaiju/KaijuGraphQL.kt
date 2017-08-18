@@ -30,12 +30,17 @@ class KaijuGraphQL(val clusterStateManager: ClusterStateManager) {
         return RuntimeWiring.newRuntimeWiring()
                 .type("QueryType", {
                     it.dataFetcher("brokers", { environment ->
-                        data class Foo(val id: Int, val host: String, val port: Int)
+
+                        data class Foo(val id: Int, val host: String, val port: Int, val rack: String)
 
                         KafkaKaijuApp.LOG.info("environment arguments: " + environment.arguments)
                         KafkaKaijuApp.LOG.info("environment fields: " + environment.fields)
 
-                        arrayListOf(Foo(3, "localhost", 9092))
+                        clusterStateManager.getNodeByIds(clusterStateManager.getNodeIds()).map {
+                            it.let {
+                                Foo(id = it!!.id(), host = it!!.host(), port = it!!.port(), rack = it!!.rack())
+                            }
+                        }
                     })
                 })
                 .build()

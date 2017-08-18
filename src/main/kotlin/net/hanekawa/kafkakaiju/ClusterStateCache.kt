@@ -15,12 +15,10 @@ class ClusterStateCache {
         return nodes.keys
     }
 
-    fun getNodeByIds(nodeIds: List<Int>): List<Node?> {
-        val result = ArrayList<Node?>(nodeIds.size)
-        nodeIds.forEachIndexed({ index, nodeId ->
-            result[index] = nodes[nodeId]
-        })
-        return result
+    fun getNodeByIds(nodeIds: Collection<Int>): Collection<Node?> {
+        return nodeIds.map{
+            nodes[it]
+        }
     }
 
     fun listTopicsNames(): Collection<String> {
