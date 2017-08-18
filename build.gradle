@@ -31,3 +31,14 @@ dependencies {
 
 
 mainClassName = 'net.hanekawa.kafkakaiju.KafkaKaijuAppKt'
+
+// Allow passing in config file property when running `run` tasks
+tasks.withType(JavaExec) {
+    System.properties.each { key, value ->
+        if (key == "config.file") {
+            // Note that the file should be relative to the root of this git repo when running `run`
+            File configFile = file(value)
+            systemProperty key, configFile.absolutePath
+        }
+    }
+}

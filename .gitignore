@@ -1,3 +1,5 @@
+config/*.properties
+
 # Gradle files
 .gradle/
 gradle/
