@@ -6,6 +6,12 @@ import org.apache.kafka.clients.admin.TopicDescription
 import org.apache.kafka.clients.admin.TopicListing
 import org.apache.kafka.common.KafkaFuture
 import org.apache.kafka.common.Node
+import org.jetbrains.ktor.host.embeddedServer
+import org.jetbrains.ktor.http.ContentType
+import org.jetbrains.ktor.netty.Netty
+import org.jetbrains.ktor.response.respondText
+import org.jetbrains.ktor.routing.get
+import org.jetbrains.ktor.routing.routing
 import java.util.*
 import kotlin.concurrent.thread
 
@@ -26,7 +32,17 @@ class KafkaKaijuApp(val config: Config) {
 
         updater.run()
 
-        Thread.sleep(10_000_000)
+        val server = embeddedServer(Netty, 8080) {
+            routing {
+                get("/topics") {
+                    call.respondText(cache.listTopicsNames().toString(), ContentType.Text.Plain)
+                }
+                get("/partitions") {
+                    call.respondText(cache.getTopicDescriptions(cache.listTopicsNames()).toString(), ContentType.Text.Plain)
+                }
+            }
+        }
+        server.start(wait = true)
 
         adminClient.close()
         System.out.println("Closed")
@@ -43,7 +59,7 @@ class StateCacheUpdater(val stateCache: KafkaClusterStateCache, val adminClient:
         thread(start = true) {
             while (true) {
                 refreshCache()
-                Thread.sleep(10_000)
+                Thread.sleep(60_000)
             }
         }
     }

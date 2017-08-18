@@ -27,12 +27,10 @@ class KafkaClusterStateCache {
         return topicDescriptions.keys
     }
 
-    fun getTopicDescriptions(topicNames: List<String>): List<TopicDescription?> {
-        var result = ArrayList<TopicDescription?>(topicNames.size)
-        topicNames.forEachIndexed({ index, topicName ->
-            result[index] = topicDescriptions[topicName]
-        })
-        return result
+    fun getTopicDescriptions(topicNames: Collection<String>): List<TopicDescription?> {
+        return topicNames.map {
+            topicDescriptions[it]
+        }
     }
 
     fun updateNodes(newNodes: Collection<Node>?) {
