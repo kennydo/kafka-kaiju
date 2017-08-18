@@ -1,7 +1,10 @@
 package net.hanekawa.kafkakaiju
 
+import com.squareup.moshi.FromJson
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
+import com.squareup.moshi.ToJson
+import graphql.GraphQLError
 import org.jetbrains.ktor.host.embeddedServer
 import org.jetbrains.ktor.http.ContentType
 import org.jetbrains.ktor.http.HttpStatusCode
@@ -16,7 +19,9 @@ import java.util.concurrent.TimeUnit
 
 
 data class GraphQLRequest(val query: String, val operationName: String?, val variables: Map<String, Any>?)
-data class GraphQLResponse(val data: Map<String, Any>?, val errors: List<Any>?)
+data class GraphQLResponse(val data: Map<String, Any>?, val errors: List<GraphQLError>?)
+data class ErrorLocation(val line: Int, val column: Int)
+data class ErrorEntry(val message: String, val locations: List<ErrorLocation>?)
 
 
 class KaijuWebServer(private val graphQL: KaijuGraphQL, private val port: Int = 8080) : Runnable, Closeable {
@@ -24,7 +29,25 @@ class KaijuWebServer(private val graphQL: KaijuGraphQL, private val port: Int = 
         val LOG = getLogger(this::class.java)
     }
 
-    private val moshi = Moshi.Builder().build()
+    private val moshi = Moshi
+            .Builder()
+            .add(object {
+                @ToJson
+                fun toErrorEntry(error: GraphQLError): ErrorEntry {
+                    return ErrorEntry(
+                            message = error.message,
+                            locations = error.locations?.map {
+                                ErrorLocation(it.line, it.column)
+                            }
+                    )
+                }
+
+                @FromJson
+                fun fromErrorEntry(entry: ErrorEntry): GraphQLError {
+                    throw NotImplementedError("Not implemented!")
+                }
+            })
+            .build()
     private val graphQLRequestAdapter = moshi.adapter(GraphQLRequest::class.java).failOnUnknown()
     private val graphQLResponseAdapter = moshi.adapter(GraphQLResponse::class.java)
 
