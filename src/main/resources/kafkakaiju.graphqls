@@ -1,0 +1,29 @@
+schema {
+    query: QueryType
+}
+
+type QueryType {
+    brokers(rack: String): [Broker]!
+    topic(name: String): Topic!
+}
+
+type Broker {
+    id: Int!
+    host: String!
+    port: Int!
+    rack: String
+}
+
+type Topic {
+    name: String!
+    isInternal: Boolean!
+    partitions: [TopicPartition]!
+}
+
+type TopicPartition {
+    topic: Topic!
+    partition: Int!
+    leader: Broker
+    inSyncReplicas: [Broker]!
+    replicas: [Broker]!
+}

@@ -3,7 +3,7 @@ package net.hanekawa.kafkakaiju
 import org.apache.kafka.clients.admin.TopicDescription
 import org.apache.kafka.common.Node
 
-class KafkaClusterStateCache {
+class ClusterStateCache {
     companion object {
         val LOG = getLogger(this::class.java)
     }
